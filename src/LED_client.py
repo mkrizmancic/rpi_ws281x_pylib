@@ -73,19 +73,19 @@ class LEDClient(object):
         return self.socket.recv_json()
 
     def set_rainbow(self, brightness, start=0):
-        pixels = [LEDClient.hsv2rgb(h, 1, brightness / 255)
-                  for h in np.roll(np.linspace(0, 1, self.led_conf['count']), start)]
+        pixels = [LEDClient.hsv2rgb(h, 255, brightness)
+                  for h in np.roll(np.linspace(0, 255, self.led_conf['count']), start)]
         self.socket.send_json(pixels)
         return self.socket.recv_json()
 
     def set_random(self, brightness):
-        pixels = [LEDClient.hsv2rgb(random.random(), 1, brightness / 255) for i in range(self.led_conf['count'])]
+        pixels = [LEDClient.hsv2rgb(random.random() * 255, 25, brightness) for i in range(self.led_conf['count'])]
         self.socket.send_json(pixels)
         return self.socket.recv_json()
 
     @staticmethod
     def hsv2rgb(h, s, v):
-        return tuple(int(round(i * 255)) for i in colorsys.hsv_to_rgb(h, s, v))
+        return tuple(int(round(i * 255)) for i in colorsys.hsv_to_rgb(h / 255, s / 255, v / 255))
 
 
 if __name__ == '__main__':
