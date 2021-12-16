@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import sys
+import signal
 import time
 import zmq
 from rpi_ws281x import PixelStrip, Color
@@ -14,6 +16,8 @@ LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest
 LED_INVERT = False    # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class LEDServer(object):
     def __init__(self):
@@ -27,6 +31,9 @@ class LEDServer(object):
         self.strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
+
+        signal.signal(signal.SIGINT, self.exit)
+
         self.init_animation()
         print("LED strip is ready to receive commands.")
 
@@ -59,11 +66,12 @@ class LEDServer(object):
                     else:
                         print("NO DATA")
 
-    def exit(self):
+    def exit(self, signum, frame):
         print("Turning off LEDs and exiting.")
         for i in range(LED_COUNT):
             self.strip.setPixelColor(i, Color(0, 0, 0))
         self.strip.show()
+        sys.exit(0)
 
     def set_pixels(self, pixels):
         for i, color in enumerate(pixels):
@@ -73,8 +81,6 @@ class LEDServer(object):
 
 
 if __name__ == '__main__':
-    try:
-        ls = LEDServer()
-        ls.run()
-    except KeyboardInterrupt:
-        ls.exit()
+    ls = LEDServer()
+    ls.run()
+

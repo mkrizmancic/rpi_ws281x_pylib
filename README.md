@@ -9,8 +9,17 @@ PWM GPIO pins on Raspberry Pi that are used for driving the LEDs require root ac
 1. Check their Running section to test out the build.
 1. Install necessary python packages: `sudo pip3 install rpi_ws281x pyzmq numpy` (Using sudo is important!)
 1. Clone this repository (wherever).
+1. Install the library so it can be imported from anywhere:
+```shell script
+cd <path_to_cloned_repository>/src
+pip3 install .
+```
+1. Make a symlink so server can be run from anywhere.
+```shell script
+sudo ln -s rpi_ws281x_pylib/LED_server.py /usr/local/bin/LED_server
+```
 
 ## Usage
-To test the installation, run `sudo python3 example.py`.
+To test the installation, run `sudo python3 rpi_ws281x_pylib/examples/example.py`.
 
 To control the LEDs, first run `sudo python3 LED_server.py`. Then, in a separate process, run `python3 LED_client.py`. Client currently cycles through 32 colors for a few seconds and then exits. In general, you want to import the client to your application, create an instance and then use the API functions to get the desired effects.
