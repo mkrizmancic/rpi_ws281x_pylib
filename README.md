@@ -14,9 +14,9 @@ PWM GPIO pins on Raspberry Pi that are used for driving the LEDs require root ac
 cd <path_to_cloned_repository>/src
 pip3 install .
 ```
-1. Make a symlink so server can be run from anywhere.
+7. Make a symlink so server can be run from anywhere.
 ```shell script
-sudo ln -s rpi_ws281x_pylib/LED_server.py /usr/local/bin/LED_server
+sudo ln -s <full_path_to_package>/LED_server.py /usr/local/bin/LED_server
 ```
 
 ## Usage
