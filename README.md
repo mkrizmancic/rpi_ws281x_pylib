@@ -20,6 +20,12 @@ sudo ln -s <full_path_to_package>/LED_server.py /usr/local/bin/LED_server
 ```
 
 ## Usage
-To test the installation, run `sudo python3 rpi_ws281x_pylib/examples/example.py`.
+To test the installation, run `sudo python3 rpi_ws281x_pylib/examples/test_example.py`.
 
 To control the LEDs, first run `sudo python3 LED_server.py`. Then, in a separate process, run `python3 LED_client.py`. Client currently cycles through 32 colors for a few seconds and then exits. In general, you want to import the client to your application, create an instance and then use the API functions to get the desired effects.
+
+## Examples
+All examples assume you are positioned in the `examples` directory.
+
+1. Set color from CMD. `bash set_cmd.sh`
+
