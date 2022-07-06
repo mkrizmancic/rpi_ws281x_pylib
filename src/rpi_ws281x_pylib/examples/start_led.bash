@@ -9,10 +9,11 @@ killall() {
     sudo kill -TERM 0         # fixed order, send TERM not INT
     wait
     echo DONE
+    exit
 }
 
 sudo LED_server &
 sleep 2
-python3 set_from_cmd.py
+python3 $1.py
 
 cat

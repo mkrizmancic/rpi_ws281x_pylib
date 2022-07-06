@@ -4,6 +4,7 @@ import zmq
 import time
 import colorsys
 import numpy as np
+import math
 
 
 # VERY BIG TODO: Check user inputs and prevent errors
@@ -83,9 +84,73 @@ class LEDClient(object):
         self.socket.send_json(pixels)
         return self.socket.recv_json()
 
+    def add_line(self, pixels, index, color, color_space='rgb'):
+        if index < 0 or index >= self.led_conf['width']:
+            print("ERROR: Index out of range.")
+            return
+
+        if color_space == 'hsv':
+            color = LEDClient.hsv2rgb(*color)
+
+        for i in range(self.led_conf['height']):
+            pixels[i * self.led_conf['width'] + index] = color
+
+        return pixels
+
+    def set_line(self, index, color, color_space='rgb'):
+        pixels = [(0, 0, 0)] * self.led_conf['count']
+        pixels = self.add_line(pixels, index, color, color_space)
+
+        self.socket.send_json(pixels)
+        return self.socket.recv_json()
+
+    def set_percentage(self, percent, resolution, base_color, mode, color_space='rgb'):
+        if color_space == 'rgb':
+            base_color = LEDClient.rgb2hsv(*base_color)      
+
+        if mode == 'center':
+            resolution = int(resolution / 2)
+
+        levels = resolution // self.led_conf['width']
+
+        if mode == 'l2r':
+            max_val = levels * self.led_conf['width'] - 1
+        elif mode == 'center':
+            max_val = levels * (self.led_conf['width'] // 2) - 1
+
+        pixels = [(0, 0, 0)] * self.led_conf['count']
+
+        x = LEDClient.interp(percent, 0, 1, 0, max_val)
+
+        for i in range(x // levels + 1):
+            if i < x // levels:
+                color = base_color
+            else:
+                step = (x % levels + 1) / levels
+                color = (base_color[0], int(round(base_color[1] * step)), base_color[2])
+
+            if mode == 'l2r':
+                pixels = self.add_line(pixels, i, color, color_space='hsv')
+            elif mode == 'center':
+                pixels = self.add_line(pixels, i + self.led_conf['width'] // 2, color, color_space='hsv')
+                pixels = self.add_line(pixels, -i + self.led_conf['width'] // 2 - 1, color, color_space='hsv')
+
+        self.socket.send_json(pixels)
+        return self.socket.recv_json()
+        
+
     @staticmethod
     def hsv2rgb(h, s, v):
         return tuple(int(round(i * 255)) for i in colorsys.hsv_to_rgb(h / 255, s / 255, v / 255))
+
+    @staticmethod
+    def rgb2hsv(r, g, b):
+        return tuple(int(round(i * 255)) for i in colorsys.rgb_to_hsv(r / 255, g / 255, b / 255))
+
+    @staticmethod
+    def interp(x, in_min, in_max, out_min, out_max):
+        x = max(min(x, in_max), in_min)
+        return round((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 
 
 if __name__ == '__main__':
